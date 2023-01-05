@@ -1,0 +1,46 @@
+image: docker:latest
+
+services:
+- name: docker:dind
+
+stages:
+  - build
+  - deploy
+
+before_script:
+  - apk add --update --no-cache jq py-pip
+  - pip install awscli
+  
+variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+ 
+stage_build:
+  stage: build
+  script:
+    - echo Logging in to Amazon ECR...
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+    - echo Build started on `date`
+    - echo Building the Docker image...          
+    - docker build -f Dockerfile.staging -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+    - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+    - echo Build completed on `date`
+    - echo Pushing the Docker image...
+    - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+
+stage_deploy:
+  stage: deploy
+  environment:
+    name: staging
+    url: https://bp-api.iscriptsdemo.com
+  script:
+    - echo `aws ecs describe-task-definition --task-definition  $CI_AWS_ECS_TASK_DEFINITION --region $AWS_DEFAULT_REGION` > input.json
+    - echo $(cat input.json | jq '.taskDefinition.containerDefinitions[].image="'$REPOSITORY_URL':'$IMAGE_TAG'"') >  input.json
+    - echo $(cat input.json | jq '.taskDefinition') > input.json
+    - echo $(cat input.json | jq  'del(.taskDefinitionArn)' | jq 'del(.revision)' | jq 'del(.status)' | jq 'del(.requiresAttributes)' | jq 'del(.compatibilities)' | jq 'del(.registeredAt)' | jq 'del(.registeredBy)') > input.json
+    - echo $(cat input.json)
+    - aws ecs register-task-definition --cli-input-json file://input.json --region $AWS_DEFAULT_REGION 
+    - revision=$(aws ecs describe-task-definition --task-definition $CI_AWS_ECS_TASK_DEFINITION --region $AWS_DEFAULT_REGION | egrep "revision" | tr "/" " " | awk '{print $2}' | sed 's/"$//' | cut -d "," -f 1)
+    - aws ecs update-service --cluster $CI_AWS_ECS_CLUSTER --service $CI_AWS_ECS_SERVICE  --task-definition $CI_AWS_ECS_TASK_DEFINITION:$revision --region $AWS_DEFAULT_REGION

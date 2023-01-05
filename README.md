@@ -1,1 +1,3 @@
-# flamingo-api
+## NodeJS API
+
+NodeJS API for boilerplate features

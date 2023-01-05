@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  node-api-server:
+    build: .
+    image: node-api-server
+    ports:
+      - '${PORT}:${PORT}'
+    volumes:
+      - .:/usr/src/node-api-server

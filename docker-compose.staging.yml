@@ -1,0 +1,29 @@
+version: '3'
+
+networks:
+  staging_env_network:
+    driver: bridge
+
+services:
+  redis:
+    image: redis
+    container_name: redis-boilerplate
+    restart: always
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    command: redis-server --save 60 1 --requirepass ${REDIS_PASS} --loglevel warning
+    volumes:
+      - $PWD/redis-data:/var/lib/redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+    networks:
+      - staging_env_network
+
+  node-api-server:
+    container_name: node-api-server-staging
+    command: npm run staging
+    restart: always
+    depends_on:
+      - redis
+    networks:
+      - staging_env_network

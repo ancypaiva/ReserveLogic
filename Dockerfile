@@ -1,0 +1,13 @@
+FROM node:16.13.0-alpine
+
+RUN mkdir -p /node-api-server
+
+WORKDIR /node-api-server
+
+COPY package.json npm-shrinkwrap.json ./
+
+RUN npm install
+
+COPY . /node-api-server
+
+EXPOSE 4075
