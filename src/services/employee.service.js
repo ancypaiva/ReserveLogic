@@ -41,6 +41,53 @@ const queryEmployees = async (filter, options) => {
   return users;
 };
 
+const searchEmployees = async (filter, options) => {
+  const query = [
+    {
+      $search: {
+        compound: {
+          should: [
+            {
+              text: {
+                query: options.searchBy,
+                path: 'name',
+                score: {
+                  boost: {
+                    value: 6,
+                  },
+                },
+                fuzzy: {},
+              },
+            },
+            {
+              text: {
+                query: options.searchBy,
+                path: ['email', 'phone', 'designation'],
+                fuzzy: {},
+              },
+            },
+          ],
+        },
+      },
+    },
+  ];
+  const employees = await Employee.aggregate(query)
+    .collation({ locale: 'en', strength: 2 })
+    .skip(options.limit * options.page - options.limit)
+    .limit(options.limit)
+    .exec();
+  const fullEmployees = await Employee.aggregate(query).exec();
+  const results = {
+    Displayfields: Displayfields.employee,
+    limit: options.limit,
+    page: options.page,
+    results: employees,
+    totalPages: Math.ceil(fullEmployees.length / options.limit),
+    totalResults: fullEmployees.length,
+  };
+  return results;
+};
+
 /**
  * Get user by id
  * @param {ObjectId} id
@@ -86,4 +133,12 @@ const deleteEmployeeById = async (userId) => {
   return user;
 };
 
-module.exports = { createEmployee, queryEmployees, getEmployeeById, getUserByEmail, updateEmployeeById, deleteEmployeeById };
+module.exports = {
+  createEmployee,
+  queryEmployees,
+  getEmployeeById,
+  getUserByEmail,
+  updateEmployeeById,
+  deleteEmployeeById,
+  searchEmployees,
+};

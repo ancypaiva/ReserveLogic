@@ -6,6 +6,7 @@ const settingsController = require('../../controllers/settings.controller');
 const router = express.Router();
 
 router.route('/').get(settingsController.getSettings);
+router.route('/getLogo').get(settingsController.getLogoDetails);
 router.route('/logo').post(settingsController.updateLogo);
 router.route('/logoremove').post(settingsController.removeLogo);
 router.route('/updatedate').patch(settingsController.updateDate);

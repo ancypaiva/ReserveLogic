@@ -21,8 +21,13 @@ const getEmployees = catchAsync(async (req, res) => {
     const toDate = new Date(dateranges.endDate);
     filter.createdAt = { $lte: toDate, $gte: fromDate };
   }
-  const result = await employeeService.queryEmployees(filter, options);
-  res.send(formatResponse(true, 200, 'list-employees', { result }));
+  if (options.searchBy && options.searchBy.length > 0) {
+    const result = await employeeService.searchEmployees(filter, options);
+    res.send(formatResponse(true, 200, 'list-employees', { result }));
+  } else {
+    const result = await employeeService.queryEmployees(filter, options);
+    res.send(formatResponse(true, 200, 'list-employees', { result }));
+  }
 });
 
 const getEmployee = catchAsync(async (req, res) => {

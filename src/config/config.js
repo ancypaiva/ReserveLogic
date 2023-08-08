@@ -40,6 +40,7 @@ if (error) {
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  socketStatus: envVars.SOCKET_STATUS,
   mongoose: {
     url: envVars.DB_CONNECTION + (envVars.NODE_ENV === 'test' ? '-test' : ''),
     options: {},

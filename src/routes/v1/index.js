@@ -10,6 +10,8 @@ const dashboardRoute = require('./dashboard.route');
 const rolesRoute = require('./roles.route');
 const ReportsRoute = require('./report.route');
 const CmsRoute = require('./cms.route');
+const MoviesRoutes = require('./movies.route');
+const NotificationRoutes = require('./notifications.route');
 
 const router = express.Router();
 
@@ -53,6 +55,14 @@ const appRoutes = [
   {
     path: '/cms',
     route: CmsRoute,
+  },
+  {
+    path: '/movies',
+    route: MoviesRoutes,
+  },
+  {
+    path: '/notifications',
+    route: NotificationRoutes,
   },
 ];
 

@@ -4,10 +4,11 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { roleService } = require('../services');
 const { crud } = require('../services');
-const { allModules } = require('../config/modules');
+const { Menu } = require('../config/menu');
 const defaultroles = require('../config/defaultroles');
 const { userService } = require('../services');
 const { formatResponse } = require('../utils/commonUtils');
+const { setCacheDataWithExpiry } = require('../utils/redisCache');
 
 const createRole = catchAsync(async (req, res) => {
   const roles = req.body;
@@ -24,7 +25,7 @@ const getRoles = catchAsync(async (req, res) => {
 });
 
 const getModules = catchAsync(async (_req, res) => {
-  res.send(formatResponse(true, 200, 'all-modules', { allModules }));
+  res.send(formatResponse(true, 200, 'all-modules', { Menu }));
 });
 
 const getRole = catchAsync(async (req, res) => {
@@ -32,7 +33,7 @@ const getRole = catchAsync(async (req, res) => {
   if (!role || role.isDeleted) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Role not found');
   }
-  const response = { result: role, modules: allModules };
+  const response = { result: role, modules: Menu };
   res.send(formatResponse(true, 200, 'get-role', { response }));
 });
 
@@ -45,8 +46,11 @@ const getRoleSelect = catchAsync(async (req, res) => {
 });
 
 const updateRole = catchAsync(async (req, res) => {
-  const role = await roleService.updateRoleById(req.params.RoleId, req.body);
+  const roles = req.body;
+  Array.prototype.push.apply(roles.permissions, defaultroles);
+  const role = await roleService.updateRoleById(req.params.RoleId, roles);
   const userMenu = await userService.refreshMenu(role.name);
+  setCacheDataWithExpiry(`menu-${role.name}`, JSON.stringify(userMenu.userMenu));
   res.send({ success: true, code: 200, role, userMenu });
 });
 

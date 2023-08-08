@@ -40,13 +40,24 @@ const verifyCallback = (req, resolve, reject) => async (err, user, info) => {
   }
   let filteredResult = false;
   if (anypermission) {
-    filteredResult = userRights.find(
-      (e) => e.section === module && (e.view === true || e.create === true || e.edit === true || e.delete === true)
+    filteredResult = userRights.find((e) =>
+      e.submenu
+        ? e.submenu.find(
+            (a) => a.section === module && (a.view === true || a.create === true || a.edit === true || a.delete === true)
+          )
+        : e.section === module && (e.view === true || e.create === true || e.edit === true || e.delete === true)
     );
   } else {
-    filteredResult = userRights.find((e) => e.section === module && e[permission] === true);
+    filteredResult = userRights.find((e) =>
+      e.submenu
+        ? e.submenu.find((a) => a.section === module && a[permission] === true)
+        : e.section === module && e[permission] === true
+    );
+    if (!filteredResult && permission === 'view')
+      filteredResult = userRights.find((e) =>
+        e.submenu ? e.submenu.find((a) => a.section === module && a.edit === true) : e.section === module && e.edit === true
+      );
   }
-
   if (!filteredResult) {
     return reject(new ApiError(httpStatus.FORBIDDEN, 'Permission Denied'));
   }

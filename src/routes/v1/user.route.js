@@ -16,7 +16,7 @@ router.route('/imageupload').post(userController.postImageUpload);
 router.route('/imageremove').post(userController.removeImageUpload);
 router
   .route('/:userId')
-  .get(validate(userValidation.getUser), userController.getUser)
+  .get(auth(), validate(userValidation.getUser), userController.getUser)
   .patch(auth(), upload.any('File'), validate(userValidation.updateUser), userController.updateUser)
   .delete(auth(), validate(userValidation.deleteUser), userController.deleteUser);
 

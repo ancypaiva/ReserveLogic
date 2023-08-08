@@ -23,6 +23,12 @@ const getSettings = catchAsync(async (_req, res) => {
   res.send(result);
 });
 
+const getLogoDetails = catchAsync(async (_req, res) => {
+  const result = await settingsService.getSettings();
+  result[0].values = {};
+  res.send(result[0]);
+});
+
 const updateSettings = catchAsync(async (req, res) => {
   const settings = await settingsService.updateSettingsByType(req.params.type, req.body);
   res.send(settings);
@@ -63,4 +69,5 @@ module.exports = {
   updateLogo,
   removeLogo,
   updateDate,
+  getLogoDetails,
 };

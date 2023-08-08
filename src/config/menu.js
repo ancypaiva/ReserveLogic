@@ -1,32 +1,39 @@
 const Menu = [
   {
     name: 'Dashboard',
-    urlPath: '/dashboard/',
+    urlPath: '/dashboard',
     modules: 'dashboard',
     icon: 'FaMicrosoft',
   },
   {
     name: 'Users',
-    urlPath: '/user/',
+    urlPath: '/user',
     modules: 'user',
     icon: 'FaAddressBook',
   },
-
   {
-    name: 'Employees',
-    urlPath: '/employee/',
-    modules: 'employee',
-    icon: 'FaAddressCard',
-  },
-  {
-    name: 'Profile',
-    urlPath: '/profile/',
-    modules: 'profile',
-    icon: 'FaUserCircle',
+    name: 'Section-1',
+    urlPath: '/sections',
+    modules: 'sections',
+    icon: 'FaAddressBook',
+    subMenu: [
+      {
+        name: 'Employees',
+        urlPath: '/employee',
+        modules: 'employee',
+        icon: 'FaAddressCard',
+      },
+      {
+        name: 'Movies',
+        urlPath: '/movies',
+        modules: 'movies',
+        icon: 'FaAddressCard',
+      },
+    ],
   },
   {
     name: 'Roles',
-    urlPath: '/roles/',
+    urlPath: '/roles',
     modules: 'roles',
     icon: 'FaUser',
   },

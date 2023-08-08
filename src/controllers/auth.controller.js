@@ -1,8 +1,11 @@
+/* eslint-disable no-console */
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { formatResponse } = require('../utils/commonUtils');
 const { authService, userService, tokenService, postmarkService, roleService } = require('../services');
 const { getCacheData, setCacheDataWithExpiry } = require('../utils/redisCache');
+const { subscribeToSignupEmail } = require('../utils/redisQueueProducer');
+// const { sendNewEmail } = require('../utils/redisBullQueue');
 
 const sendVerificationEmail = async (user) => {
   const verifyEmailToken = await tokenService.generateVerifyEmailToken(user);
@@ -25,7 +28,8 @@ const signup = catchAsync(async (req, res) => {
   insertUserData.role = defaultRole;
   const user = await userService.createUser(insertUserData);
   const tokens = await tokenService.generateAuthTokens(user);
-  sendVerificationEmail(user);
+  // sendVerificationEmail(user);
+  subscribeToSignupEmail(user);
   res.status(httpStatus.CREATED).send(formatResponse(true, 200, 'user-signup', { user, tokens }));
 });
 
@@ -40,6 +44,8 @@ const login = catchAsync(async (req, res) => {
   const tokens = await tokenService.generateAuthTokens(user);
   const { role } = user;
   const userMenu = await userService.menuManagement(role);
+  // save menu to redis cache
+  setCacheDataWithExpiry(`menu-${user.role.name}`, JSON.stringify(userMenu));
   // store data in redis cache
   setCacheDataWithExpiry(`user-${user.id}`, JSON.stringify(user));
   res.send(formatResponse(true, 200, 'user-login', { user, tokens, userMenu }));

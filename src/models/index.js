@@ -4,3 +4,5 @@ module.exports.Token = require('./token.model');
 module.exports.Settings = require('./settings.model');
 module.exports.Role = require('./role.model');
 module.exports.Cms = require('./cms.model');
+module.exports.Movies = require('./movies.model');
+module.exports.Notifications = require('./notifications.model');

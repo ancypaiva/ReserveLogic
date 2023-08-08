@@ -12,7 +12,7 @@ const SendEmail = async (to, data, Templatealias) => {
   const client = new postmark.ServerClient(process.env.POST_MARK);
   client
     .sendEmailWithTemplate({
-      From: process.env.FROM_EMAIL.toString(),
+      From: process.env.EMAIL_FROM,
       To: to ?? process.env.TO_DEFAULT_EMAIL.toString(),
       TemplateAlias: Templatealias ?? process.env.POST_MARK_FORGET_PASSWORD,
       TemplateModel: data,

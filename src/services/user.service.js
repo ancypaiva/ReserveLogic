@@ -127,63 +127,87 @@ const deleteMultipleUsers = async (req, res) => {
 
 const menuManagement = async (role) => {
   const menuss = Menu.Menu;
-  let userMenu = [];
-  const rolename = [];
-  const indes = [];
-  let arrayWithValuesRemoved = [];
-  // eslint-disable-next-line no-plusplus
-  for (const each of role.permissions) {
-    if (each.create === true || each.view === true || each.delete === true || each.edit === true) {
-      rolename.push(each.section);
-    }
-    // eslint-disable-next-line no-use-before-define
-    rolename.forEach(getIndex);
+  const userMenu = [];
 
-    // eslint-disable-next-line no-inner-declarations
-    function getIndex(value) {
-      const findIndex = menuss.findIndex((a) => a.modules === value);
-      indes.push(findIndex);
-    }
-    const indexSet = new Set(indes);
+  for (const element of role.permissions) {
+    const filteredMenus = menuss.filter((menu) => menu.modules === element.section);
 
-    arrayWithValuesRemoved = menuss.filter((_value, k) => indexSet.has(k));
+    if (element.submenu) {
+      const subMenu = [];
+
+      for (const subElement of element.submenu) {
+        const filteredSubItems = filteredMenus.flatMap((menu) =>
+          menu.subMenu.filter((subItem) => subItem.modules === subElement.section)
+        );
+
+        if (subElement.create || subElement.view || subElement.delete || subElement.edit) {
+          subMenu.push(...filteredSubItems);
+        }
+      }
+
+      if (subMenu.length > 0) {
+        const menuData = {
+          name: filteredMenus[0].name,
+          urlPath: filteredMenus[0].urlPath,
+          modules: filteredMenus[0].modules,
+          icon: filteredMenus[0].icon,
+          subMenu,
+        };
+        userMenu.push(menuData);
+      }
+    } else if (element.create || element.view || element.delete || element.edit) {
+      userMenu.push(...filteredMenus);
+    }
   }
-
-  userMenu = arrayWithValuesRemoved;
 
   return userMenu;
 };
 const refreshMenu = async (role) => {
   let permission;
   const menuss = Menu.Menu;
-  let userMenu = [];
-  const rolename = [];
-  const indes = [];
-  let arrayWithValuesRemoved = [];
+  const userMenu = [];
   const users = await Role.find({ name: role }).exec();
   // eslint-disable-next-line array-callback-return
   users.map((user) => {
     // console.log(user.permissions);
     permission = user.permissions;
     // eslint-disable-next-line no-plusplus
-    for (const each of user.permissions) {
-      if (each.create === true || each.view === true || each.delete === true || each.edit === true) {
-        rolename.push(each.section);
-      }
-      // eslint-disable-next-line no-use-before-define
-      rolename.forEach(myFunction);
-
-      // eslint-disable-next-line no-inner-declarations
-      function myFunction(value) {
-        const findIndex = menuss.findIndex((a) => a.modules === value);
-        indes.push(findIndex);
-      }
-      const indexSet = new Set(indes);
-
-      arrayWithValuesRemoved = menuss.filter((_value, k) => indexSet.has(k));
-    }
+    permission.forEach(async (element) => {
+      menuss.forEach(async (menus) => {
+        if (menus.modules === element.section) {
+          if (element.submenu) {
+            if (element.view === true) {
+              const subMenu = [];
+              await element.submenu.forEach((subElement) => {
+                if (
+                  subElement.create === true ||
+                  subElement.view === true ||
+                  subElement.delete === true ||
+                  subElement.edit === true
+                ) {
+                  menus.subMenu.forEach((subItem) => {
+                    if (subItem.modules === subElement.section) {
+                      subMenu.push(subItem);
+                    }
+                  });
+                }
+              });
+              const menudata = {
+                name: menus.name,
+                urlPath: menus.urlPath,
+                modules: menus.modules,
+                icon: menus.icon,
+                subMenu,
+              };
+              userMenu.push(menudata);
+            }
+          } else if (element.create === true || element.view === true || element.delete === true || element.edit === true) {
+            userMenu.push(menus);
+          }
+        }
+      });
+    });
   });
-  userMenu = arrayWithValuesRemoved;
   return { userMenu, permission };
 };
 

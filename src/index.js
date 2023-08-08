@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 const mongoose = require('mongoose');
 const app = require('./app');
 const config = require('./config/config');
@@ -9,6 +10,11 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   server = app.listen(config.port, () => {
     logger.info(`Listening on port ${config.port}`);
   });
+  // console.log('CNF : ', config.socketStatus)
+  if (config.socketStatus === 'ON') {
+    const { connectSocket } = require('./utils/socketUtils');
+    connectSocket(server);
+  }
 });
 
 const exitHandler = () => {
