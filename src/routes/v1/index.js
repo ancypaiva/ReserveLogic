@@ -11,6 +11,7 @@ const rolesRoute = require('./roles.route');
 const ReportsRoute = require('./report.route');
 const CmsRoute = require('./cms.route');
 const MoviesRoutes = require('./movies.route');
+const HotelsRoutes = require('./hotels.route');
 const NotificationRoutes = require('./notifications.route');
 
 const router = express.Router();
@@ -59,6 +60,10 @@ const appRoutes = [
   {
     path: '/movies',
     route: MoviesRoutes,
+  },
+  {
+    path: '/hotels',
+    route: HotelsRoutes,
   },
   {
     path: '/notifications',

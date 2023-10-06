@@ -12,4 +12,5 @@ module.exports.roleService = require('./roles.service');
 module.exports.reportService = require('./report.service');
 module.exports.cmsService = require('./cms.service');
 module.exports.moviesService = require('./movies.service');
+module.exports.hotelsService = require('./hotels.service');
 module.exports.notificationService = require('./notifications.service');

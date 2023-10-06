@@ -23,6 +23,7 @@ const paginate = (schema) => {
   schema.statics.paginate = async function pagination(filterValue, options, searchBy = searchByFields.searchByFields) {
     const defaultFilter = {
       isDeleted: false,
+      // 'rooms.room_type': 'Deluxe Ocean View Suite',
     };
     const filter = {
       ...filterValue,
@@ -40,6 +41,8 @@ const paginate = (schema) => {
       sort = 'createdAt';
     }
 
+    // console.log(filter, 'filter');
+
     const limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
     const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
     const skip = (page - 1) * limit;
@@ -49,12 +52,18 @@ const paginate = (schema) => {
     let docsPromise = this.find(filter).sort(sort).skip(skip).limit(limit);
     // console.log(Object.keys(docsPromise).length);
     // const fields = ['name', 'email', 'phone'];
+
     if (options.searchBy) {
       searchBy.forEach((element) => {
         // const searchbale = `{${element}: { $regex: '${options.searchBy}' } }`;
         const searchbale = { [element]: { $regex: options.searchBy, $options: 'i' } };
+        // const dynamicFilter = {};
+        // dynamicFilter[filterOptions.fieldToFilter] = { $regex: filterOptions.valueToFilter, $options: 'i' };
+        // criteria.$or.push(dynamicFilter);
+
         criteria.$or.push(searchbale);
       });
+
       countPromise = this.countDocuments({ ...filter, ...criteria }).exec();
       docsPromise = this.find(criteria).find(filter).sort(sort).skip(skip).limit(limit);
       // console.log(Object.keys(docsPromise).length);

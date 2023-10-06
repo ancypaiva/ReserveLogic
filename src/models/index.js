@@ -5,4 +5,5 @@ module.exports.Settings = require('./settings.model');
 module.exports.Role = require('./role.model');
 module.exports.Cms = require('./cms.model');
 module.exports.Movies = require('./movies.model');
+module.exports.Hotels = require('./hotels.model'); // exporting hotel module
 module.exports.Notifications = require('./notifications.model');

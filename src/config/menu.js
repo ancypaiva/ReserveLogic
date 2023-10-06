@@ -29,6 +29,12 @@ const Menu = [
         modules: 'movies',
         icon: 'FaAddressCard',
       },
+      {
+        name: 'Hotels',
+        urlPath: '/hotels',
+        modules: 'hotels',
+        icon: 'FaHotel',
+      },
     ],
   },
   {
