@@ -20,6 +20,7 @@ const createHotels = {
         Joi.object().keys({
           room_type: Joi.string().required(),
           price: Joi.number().required(),
+          amenities: Joi.array(),
         })
       )
       .required(),

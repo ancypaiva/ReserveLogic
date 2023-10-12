@@ -21,13 +21,14 @@ const HotelsSchema = mongoose.Schema(
           type: Number,
           required: true,
         },
+        amenities: [],
       },
     ],
     price: {
       type: String,
     },
     image: {
-      type: String,
+      type: [String],
       default: process.env.DEFAULT_IMG,
     },
     isDeleted: {
